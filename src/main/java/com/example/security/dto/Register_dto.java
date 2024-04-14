@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Date;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -13,7 +15,12 @@ public class Register_dto {
 
     private String email;
     private String password;
-    private String fullname;
+    private String fullName;
+    private Date birthDate;
+    private String gender;
+    private Long lastDiagnosis;
+    private String contact;
     private String rePassword;
+
 
 }

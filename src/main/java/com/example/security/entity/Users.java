@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.sql.Date;
 import java.util.Collection;
 import java.util.List;
 
@@ -28,8 +29,23 @@ public class Users implements UserDetails {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "fullname")
-    private String fullname;
+    @Column(name = "full_name")
+    private String fullName;
+
+    @Column(name = "birth_date")
+    private Date birthDate;
+
+    @Column(name = "gender")
+    private String gender;
+
+    @Column(name = "last_diagnosis")
+    private Long lastDiagnosis;
+
+    @Column(name = "contact")
+    private String contact;
+
+
+
 
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Roles> roles;
@@ -64,10 +80,14 @@ public class Users implements UserDetails {
         return true;
     }
 
-    public Users(Long id, String email, String password, String fullname) {
+    public Users(Long id, String email, String password, String fullName, Date birthDate, String gender, Long lastDiagnosis, String contact) {
         this.id = id;
         this.email = email;
         this.password = password;
-        this.fullname = fullname;
+        this.fullName = fullName;
+        this.birthDate = birthDate;
+        this.gender = gender;
+        this.lastDiagnosis = lastDiagnosis;
+        this.contact = contact;
     }
 }

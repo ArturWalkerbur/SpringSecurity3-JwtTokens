@@ -14,10 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 @Controller
 @RestController
 @RequestMapping("/api/auth")
@@ -48,8 +44,8 @@ public class MainController {
     @ResponseBody
     public String Register(@RequestBody Register_dto register_dto){
         System.out.println(register_dto.getEmail());
-        System.out.println(register_dto.getFullname());
-        String result = usersService.addUser(new Users(null, register_dto.getEmail(), register_dto.getPassword(), register_dto.getFullname()), register_dto.getRePassword());
+        System.out.println(register_dto.getFullName());
+        String result = usersService.addUser(new Users(null, register_dto.getEmail(), register_dto.getPassword(), register_dto.getFullName(), register_dto.getBirthDate(), register_dto.getGender(), register_dto.getLastDiagnosis(), register_dto.getContact()), register_dto.getRePassword());
         return "New user registered!" + result;
     }
 

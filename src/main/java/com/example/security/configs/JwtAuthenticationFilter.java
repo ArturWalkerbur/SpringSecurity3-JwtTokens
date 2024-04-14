@@ -19,9 +19,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -74,8 +79,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")){
 
-            System.out.println("aaaaa");
-
             return bearerToken.substring(7, bearerToken.length());
         }
 
@@ -99,5 +102,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         return http.build();
     }
+
+
 
 }
