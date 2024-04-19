@@ -46,7 +46,7 @@ public class UsersService implements UserDetailsService {
     public String addUser(Users newUser, String rePassword) {
         Users user = usersRepository.findByEmail(newUser.getEmail());
         if (user != null){
-            return "register?email-error";
+            return "Email-error!UserExists";
         }
         if (!newUser.getPassword().equals(rePassword)) {
             return "register?password-error";
@@ -55,7 +55,7 @@ public class UsersService implements UserDetailsService {
         Roles userRole = roleRepository.findRoleUser();
         newUser.setRoles(List.of(userRole));
         usersRepository.save(newUser);
-        return "Log-in?success";
+        return "register?success";
 
     }
 

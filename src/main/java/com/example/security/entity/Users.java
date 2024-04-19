@@ -90,4 +90,15 @@ public class Users implements UserDetails {
         this.lastDiagnosis = lastDiagnosis;
         this.contact = contact;
     }
+
+    public Users(Long id, String email, String fullName, Date birthDate, String gender, Long lastDiagnosis, String contact, List<Roles> roles) {
+        this.id = id;
+        this.email = email;
+        this.fullName = fullName;
+        this.birthDate = birthDate;
+        this.gender = gender;
+        this.lastDiagnosis = lastDiagnosis;
+        this.contact = contact;
+        this.roles = roles;
+    }
 }

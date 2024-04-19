@@ -43,10 +43,8 @@ public class MainController {
     @PostMapping("/register")
     @ResponseBody
     public String Register(@RequestBody Register_dto register_dto){
-        System.out.println(register_dto.getEmail());
-        System.out.println(register_dto.getFullName());
         String result = usersService.addUser(new Users(null, register_dto.getEmail(), register_dto.getPassword(), register_dto.getFullName(), register_dto.getBirthDate(), register_dto.getGender(), register_dto.getLastDiagnosis(), register_dto.getContact()), register_dto.getRePassword());
-        return "New user registered!" + result;
+        return "New user registered?" + result;
     }
 
 

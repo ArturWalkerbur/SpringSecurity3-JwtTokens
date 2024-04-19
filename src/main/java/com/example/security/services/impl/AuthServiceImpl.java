@@ -28,11 +28,13 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public String login(User_dto loginDto) {
 
-        System.out.println(loginDto.getEmail());
-        System.out.println(loginDto.getPassword());
+        String email = loginDto.getEmail();
+        if (email.contains("%40")) {
+            email = email.replace("%40", "@");
+        }
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                loginDto.getEmail(), loginDto.getPassword()));
+                email, loginDto.getPassword()));
 
 
         SecurityContextHolder.getContext().setAuthentication(authentication);

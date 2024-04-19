@@ -2,6 +2,7 @@ package com.example.security.controllers;
 
 import com.example.security.dto.TestResults_dto;
 import com.example.security.dto.UpdatePassword;
+import com.example.security.dto.User_dto;
 import com.example.security.entity.Assessment;
 import com.example.security.entity.TestResults;
 import com.example.security.entity.Users;
@@ -40,6 +41,18 @@ public class UserController {
     public Boolean getUserDetails(){
         System.out.println("/info");
         return SecurityContextHolder.getContext().getAuthentication().isAuthenticated();
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/userdata")
+    public ResponseEntity<Users> getUserData(HttpServletRequest request){
+
+        String token = request.getHeader("Authorization");
+        if (token == null || token.isEmpty()) {
+            return null;
+        }
+
+        return ResponseEntity.ok(new Users(usersService.getCurrentUser().getId(), usersService.getCurrentUser().getEmail(), usersService.getCurrentUser().getFullName(), usersService.getCurrentUser().getBirthDate(), usersService.getCurrentUser().getGender(), usersService.getCurrentUser().getLastDiagnosis(), usersService.getCurrentUser().getContact(), usersService.getCurrentUser().getRoles()));
     }
 
     @PreAuthorize("isAuthenticated()")
