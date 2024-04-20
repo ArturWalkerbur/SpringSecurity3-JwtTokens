@@ -43,8 +43,31 @@ public class MainController {
     @PostMapping("/register")
     @ResponseBody
     public String Register(@RequestBody Register_dto register_dto){
-        String result = usersService.addUser(new Users(null, register_dto.getEmail(), register_dto.getPassword(), register_dto.getFullName(), register_dto.getBirthDate(), register_dto.getGender(), register_dto.getLastDiagnosis(), register_dto.getContact()), register_dto.getRePassword());
+        String email = register_dto.getEmail();
+        if (email.contains("%40")) {
+            email = email.replace("%40", "@");
+        }
+        System.out.println("aaaaaaaa");
+        String result = usersService.addUser(new Users(null, email, register_dto.getPassword(), register_dto.getFullName(), register_dto.getBirthDate(), register_dto.getGender(), register_dto.getLastDiagnosis(), register_dto.getContact()), register_dto.getRePassword());
+        System.out.println("eeeeeeee");
         return "New user registered?" + result;
+    }
+
+    @PreAuthorize("isAnonymous()")
+    @GetMapping("/activate/{code}")
+    @ResponseBody
+    public String activate(@PathVariable String code){
+
+        System.out.println("ffffff");
+
+        boolean isActivated = usersService.activateUser(code);
+
+        if (isActivated){
+            return "Account successfully activated!";
+        } else {
+            return "Activation code not found!";
+        }
+
     }
 
 

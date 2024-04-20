@@ -6,7 +6,9 @@ import com.example.security.entity.Roles;
 import com.example.security.entity.Users;
 import com.example.security.repository.RoleRepository;
 import com.example.security.repository.UsersRepository;
+import freemarker.template.utility.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,11 +18,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.thymeleaf.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class UsersService implements UserDetailsService {
 
@@ -33,6 +33,11 @@ public class UsersService implements UserDetailsService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private MailSender mailSender;
+
+    @Value("${Url.debug}")
+    private String hostserver;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -54,8 +59,25 @@ public class UsersService implements UserDetailsService {
         newUser.setPassword(passwordEncoder.encode(rePassword));
         Roles userRole = roleRepository.findRoleUser();
         newUser.setRoles(List.of(userRole));
+        newUser.setActivationCode(UUID.randomUUID().toString());
         usersRepository.save(newUser);
-        return "register?success";
+
+        if(!StringUtils.isEmpty(newUser.getEmail())){
+
+            String message = String.format(
+                    "Привет, %s! \n" +
+                            "Вас приветствует компания MedicalApps. Пожалуйста, перейдите по ссылке чтобы подтвердить вашу почту: "+hostserver+"/api/auth/activate/%s",
+                    newUser.getUsername(),
+                    newUser.getActivationCode()
+            );
+
+            System.out.println("ccccccccc");
+
+            mailSender.send(newUser.getEmail(), "Activation Code", message);
+
+        }
+
+        return "register?success&butNotAuthenticated";
 
     }
 
@@ -84,4 +106,21 @@ public class UsersService implements UserDetailsService {
         return "profile?success";
     }
 
+    public boolean activateUser(String code) {
+
+        Users user = usersRepository.findByActivationCode(code);
+
+        if (user == null){
+            return false;
+        }
+
+        System.out.println("jjjjjjjjj");
+
+        user.setActivationCode(null);
+
+        usersRepository.save(user);
+
+        return true;
+
+    }
 }

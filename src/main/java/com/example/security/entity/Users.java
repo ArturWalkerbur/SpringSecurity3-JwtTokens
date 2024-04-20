@@ -44,6 +44,9 @@ public class Users implements UserDetails {
     @Column(name = "contact")
     private String contact;
 
+    @Column(name = "activation_code")
+    private String activationCode;
+
 
 
 
