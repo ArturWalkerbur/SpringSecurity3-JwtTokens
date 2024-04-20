@@ -62,6 +62,8 @@ public class UsersService implements UserDetailsService {
         newUser.setActivationCode(UUID.randomUUID().toString());
         usersRepository.save(newUser);
 
+
+
         if(!StringUtils.isEmpty(newUser.getEmail())){
 
             String message = String.format(

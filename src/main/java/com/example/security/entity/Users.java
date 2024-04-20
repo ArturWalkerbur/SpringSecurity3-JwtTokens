@@ -80,7 +80,10 @@ public class Users implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        if(this.activationCode == null) return true;
+
+        return false;
+
     }
 
     public Users(Long id, String email, String password, String fullName, Date birthDate, String gender, Long lastDiagnosis, String contact) {
