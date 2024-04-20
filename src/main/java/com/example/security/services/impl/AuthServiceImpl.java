@@ -31,13 +31,21 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public String login(User_dto loginDto) {
 
+
         String email = loginDto.getEmail();
         if (email.contains("%40")) {
             email = email.replace("%40", "@");
         }
 
-        Users user = userRepository.findByEmail(email);
-        if(user.isEnabled()){
+        Users user = new Users();
+
+        try {
+            user = userRepository.findByEmail(email);
+        } catch (Exception e){
+            return "User doesn`t exists";
+        }
+
+        if(!user.getActivationCode().isEmpty() || !user.getActivationCode().isBlank() || !user.getActivationCode().equals(null)){
             return "Account not activated!";
         }
 
