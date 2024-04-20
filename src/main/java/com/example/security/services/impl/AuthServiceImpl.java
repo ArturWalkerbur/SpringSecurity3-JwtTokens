@@ -37,32 +37,25 @@ public class AuthServiceImpl implements AuthService {
             email = email.replace("%40", "@");
         }
 
-        Users user = new Users();
+        Users user = userRepository.findByEmail(email);
+        if (user == null) {
+            return "User doesn't exist";
+        }
+        if(user.getActivationCode() != null){
+            return "Account not activated!";
+        }
 
-        try {
-            user = userRepository.findByEmail(email);
-            if (user == null) {
-                return "User doesn't exist";
-            }
-            if(!user.getActivationCode().isEmpty() || !user.getActivationCode().isBlank() || !user.getActivationCode().equals(null)){
-                return "Account not activated!";
-            }
-
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     email, loginDto.getPassword()));
 
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            System.out.println(authentication.isAuthenticated());
+        System.out.println(authentication.isAuthenticated());
 
-            String token = jwtTokenProvider.generateToken(authentication);
+        String token = jwtTokenProvider.generateToken(authentication);
 
-            return token;
-        } catch (Exception e){
-            return "Error while finding user by email";
-        }
-
+        return token;
 
     }
 }
