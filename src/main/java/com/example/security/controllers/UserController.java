@@ -101,6 +101,42 @@ public class UserController {
     }
 
     @PreAuthorize("isAuthenticated()")
+    @PostMapping("/addTestResult")
+    @ResponseBody
+    public ResponseEntity<String> addNewTestResult(HttpServletRequest request, @RequestBody TestResults_dto testResultsDto){
+
+        String token = request.getHeader("Authorization");
+        if (token == null || token.isEmpty()) {
+            return null;
+        }
+
+        try{
+
+            List<Indicator_dto> indicators = testResultsFunctions.convertToIndicators(testResultsDto);
+            List<Indicator_dto> filteredIndicators = indicators.stream()
+                    .filter(indicator -> !indicator.isNormal())
+                    .toList();
+
+            if(filteredIndicators.size() > 0){
+                testResultsFunctions.chooseAnalysisFunction(filteredIndicators);
+            } else {
+                return ResponseEntity.ok("New result added!");
+            }
+
+
+            return ResponseEntity.ok("Something wrong!");
+
+        }catch (Exception e){
+            e.printStackTrace();
+
+            return ResponseEntity.status(500).body("Error adding result");
+        }
+
+
+
+    }
+
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/deleteAssessment/{id}")
     @ResponseBody
     public ResponseEntity<String> deleteAssessment(HttpServletRequest request, @PathVariable(name = "id")Long id){
