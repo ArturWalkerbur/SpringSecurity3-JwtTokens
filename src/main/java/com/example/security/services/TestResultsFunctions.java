@@ -2,10 +2,13 @@ package com.example.security.services;
 
 import com.example.security.dto.Indicator_dto;
 import com.example.security.dto.TestResults_dto;
+import com.example.security.entity.StandarDataComparison;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -13,6 +16,12 @@ public class TestResultsFunctions {
 
     @Autowired
     private AnalysisService analysisService;
+
+    @Autowired
+    private StandarDataComparisonService comparisonService;
+
+    @Autowired
+    UsersService usersService;
 
     public List<Indicator_dto> convertToIndicators(TestResults_dto testResults) {
         List<Indicator_dto> indicators = new ArrayList<>();
@@ -179,10 +188,157 @@ public class TestResultsFunctions {
     }
 
     private boolean checkIfNormal(String name, double index) {
-        // Здесь вы можете добавить свои логику проверки для каждого показателя
-        // Например, сравнение с определенными диапазонами значений
-        // Верните true, если значение находится в норме, и false в противном случае
-        return true; // Для примера, всегда возвращаем true
+
+        Date birthDate = usersService.getCurrentUser().getBirthDate();
+
+        Calendar currentCalendar = Calendar.getInstance();
+
+        currentCalendar.setTime(new Date());
+
+        Calendar birthCalendar = Calendar.getInstance();
+        birthCalendar.setTime(birthDate);
+
+        int age = currentCalendar.get(Calendar.YEAR) - birthCalendar.get(Calendar.YEAR);
+
+        if (currentCalendar.get(Calendar.MONTH) < birthCalendar.get(Calendar.MONTH) ||
+                (currentCalendar.get(Calendar.MONTH) == birthCalendar.get(Calendar.MONTH) &&
+                        currentCalendar.get(Calendar.DAY_OF_MONTH) < birthCalendar.get(Calendar.DAY_OF_MONTH))) {
+            age--;
+        }
+
+        StandarDataComparison data = comparisonService.findComparisonData(name, usersService.getCurrentUser().getGender(), age);
+
+        if(data.getMin() <= index && index <= data.getMax()){
+            return true;
+        } else {
+            return false;
+        }
+
+        /*switch(name){
+            case "rbc":
+                if(data.getMin() <= index && index <= data.getMax()){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "hemoglobin":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "hematocrit":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "mchc":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "mcv":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "mch":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "colorIndicator":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "reticulocytes":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "platelets":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "wbc":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "neutrophils":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "eosinophils":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "basophils":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "lymphocytes":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "monocytes":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "ESR":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "thrombocrit":
+                if(index > 0){
+                    return true;
+                } else {
+                    return false;
+                }
+
+            default:
+                return true;
+        }*/
+
+
     }
 
 

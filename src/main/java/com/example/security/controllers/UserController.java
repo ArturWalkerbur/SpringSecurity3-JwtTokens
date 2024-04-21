@@ -5,9 +5,11 @@ import com.example.security.dto.TestResults_dto;
 import com.example.security.dto.UpdatePassword;
 import com.example.security.dto.User_dto;
 import com.example.security.entity.Assessment;
+import com.example.security.entity.StandarDataComparison;
 import com.example.security.entity.Users;
 import com.example.security.repository.UsersRepository;
 import com.example.security.services.AssessmentService;
+import com.example.security.services.StandarDataComparisonService;
 import com.example.security.services.TestResultsFunctions;
 import com.example.security.services.UsersService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,10 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Controller
 @RestController
 @RequestMapping("/api/user")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -35,6 +39,9 @@ public class UserController {
 
     @Autowired
     TestResultsFunctions testResultsFunctions;
+
+    @Autowired
+    StandarDataComparisonService comparisonService;
 
 
     @PreAuthorize("isAuthenticated()")
@@ -118,13 +125,11 @@ public class UserController {
                     .toList();
 
             if(filteredIndicators.size() > 0){
-                testResultsFunctions.chooseAnalysisFunction(filteredIndicators);
+                return ResponseEntity.ok(testResultsFunctions.chooseAnalysisFunction(filteredIndicators));
             } else {
-                return ResponseEntity.ok("New result added!");
+                return ResponseEntity.ok("There's nothing wrong with your organism");
             }
 
-
-            return ResponseEntity.ok("Something wrong!");
 
         }catch (Exception e){
             e.printStackTrace();
@@ -157,6 +162,31 @@ public class UserController {
         }catch (Exception e){
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error deleting assessment");
+        }
+
+
+
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/add_comparison_data")
+    @ResponseBody
+    public ResponseEntity<String> addComparisonData(HttpServletRequest request, @RequestBody StandarDataComparison dataComparison){
+
+        String token = request.getHeader("Authorization");
+        if (token == null || token.isEmpty()) {
+            return null;
+        }
+
+        try{
+
+            comparisonService.addComparisonData(new StandarDataComparison(null, dataComparison.getIndicator(), dataComparison.getGender(), dataComparison.getAge(), dataComparison.getMin(), dataComparison.getMax()));
+            return ResponseEntity.ok("Data received");
+
+        }catch (Exception e){
+            e.printStackTrace();
+
+            return ResponseEntity.status(500).body("Error adding result");
         }
 
 
