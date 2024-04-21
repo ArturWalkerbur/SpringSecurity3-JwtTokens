@@ -10,22 +10,22 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TestResults_dto {
 
-    private double hemoglobin;
-    private double rbc;
-    private double colorIndicator;
-    private double reticulocytes;
-    private double platelets;
-    private double wbc;
-    private double neutrophils;
-    private double eosinophils;
-    private double basophils;
-    private double lymphocytes;
-    private double monocytes;
-    private double ESR;
-    private double hematocrit;
+    private double hemoglobinLevel;
+    private double rbcLevel;
+    private double colorIndicatorLevel;
+    private double reticulocytesLevel;
+    private double plateletsLevel;
+    private double wbcLevel;
+    private double neutrophilsLevel;
+    private double eosinophilsLevel;
+    private double basophilsLevel;
+    private double lymphocytesLevel;
+    private double monocytesLevel;
+    private double ESRLevel;
+    private double hematocritLevel;
     private double mchc;
     private double mcv;
     private double mch;
-    private double thrombocrit;
+    private double thrombocritLevel;
 
 }
