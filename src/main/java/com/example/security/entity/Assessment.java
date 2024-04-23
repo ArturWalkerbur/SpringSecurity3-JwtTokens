@@ -18,9 +18,9 @@ public class Assessment {
     private Long id;
 
     @Column(name = "rating")
-    private String rating;
+    private double rating;
 
-    @Column(name = "comments")
+    @Column(name = "comments", columnDefinition = "text")
     private String comments;
 
     @ManyToOne(fetch = FetchType.EAGER)

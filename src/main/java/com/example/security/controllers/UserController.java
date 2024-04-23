@@ -125,7 +125,10 @@ public class UserController {
                     .toList();
 
             if(filteredIndicators.size() > 0){
-                return ResponseEntity.ok(testResultsFunctions.chooseAnalysisFunction(filteredIndicators));
+                String comment = testResultsFunctions.chooseAnalysisFunction(filteredIndicators);
+                assessmentService.addAssessment(new Assessment(null, 10, comment, usersService.getCurrentUser()));
+
+                return ResponseEntity.ok("The data has been processed successfully!");
             } else {
                 return ResponseEntity.ok("There's nothing wrong with your organism");
             }
