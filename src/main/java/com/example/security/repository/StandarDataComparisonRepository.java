@@ -12,8 +12,8 @@ public interface StandarDataComparisonRepository extends JpaRepository<StandarDa
     @Query("SELECT s FROM StandarDataComparison s " +
             "WHERE s.indicator = :indicator " +
             "AND s.gender = :gender " +
-            "AND (s.age = :age OR s.age = (SELECT MIN(s2.age) FROM StandarDataComparison s2 WHERE s2.gender = :gender AND s2.indicator = :indicator AND s2.age > :age) " +
-            "OR s.age = (SELECT MAX(s3.age) FROM StandarDataComparison s3 WHERE s3.gender = :gender AND s3.indicator = :indicator AND s3.age < :age))")
+            "AND (s.age = (SELECT MIN(s2.age) FROM StandarDataComparison s2 WHERE s2.gender = :gender AND s2.indicator = :indicator AND s2.age > :age) " +
+            "OR s.age = (SELECT MAX(s3.age) FROM StandarDataComparison s3 WHERE s3.gender = :gender AND s3.indicator = :indicator AND s3.age <= :age))")
     StandarDataComparison findByGenderAndAge(@Param("indicator") String indicator, @Param("gender") String gender, @Param("age") int age);
 
 }

@@ -91,7 +91,24 @@ public class TestResultsFunctions {
                 neutrophilsIdx = 0, eosinophilsIdx = 0, basophilsIdx = 0, lymphocytesIdx = 0,
                 monocytesIdx = 0, esrIdx = 0, thrombocritIdx = 0;
 
-        String commentTexts = "";
+        Date birthDate = usersService.getCurrentUser().getBirthDate();
+
+        Calendar currentCalendar = Calendar.getInstance();
+
+        currentCalendar.setTime(new Date());
+
+        Calendar birthCalendar = Calendar.getInstance();
+        birthCalendar.setTime(birthDate);
+
+        int age = currentCalendar.get(Calendar.YEAR) - birthCalendar.get(Calendar.YEAR);
+        if (currentCalendar.get(Calendar.MONTH) < birthCalendar.get(Calendar.MONTH) ||
+                (currentCalendar.get(Calendar.MONTH) == birthCalendar.get(Calendar.MONTH) &&
+                        currentCalendar.get(Calendar.DAY_OF_MONTH) < birthCalendar.get(Calendar.DAY_OF_MONTH))) {
+            age--;
+        }
+
+
+        StringBuilder commentTexts = new StringBuilder();
 
         for (Indicator_dto indicator : filteredIndicators) {
             String name = indicator.getName();
@@ -99,7 +116,6 @@ public class TestResultsFunctions {
                 case "rbc":
                     rbc = true;
                     rbcIdx = indicator.getIndex();
-                    //commentTexts = commentTexts + commentIndicator(indicator.getName(), indicator.getIndex());
                     break;
                 case "hemoglobin":
                     hemoglobin = true;
@@ -166,17 +182,21 @@ public class TestResultsFunctions {
                     thrombocritIdx = indicator.getIndex();
                     break;
             }
+            commentTexts.append(" ").append(analysisService.commentIndicator(indicator.getName(), indicator.getIndex(), usersService.getCurrentUser().getGender(), age));
         }
 
         String mainCommentText = "";
 
+        System.out.println(rbc);
+
         if (rbc && hemoglobin && hematocrit && mchc && mcv && mch) {
-            mainCommentText = analysisService.analyzeBloodParameters(rbcIdx, hemoglobinIdx, hematocritIdx, mchcIdx, mcvIdx, mchIdx);
+            mainCommentText = analysisService.analyzeBloodParameters(rbcIdx, hemoglobinIdx, hematocritIdx, mchcIdx, mcvIdx, mchIdx, usersService.getCurrentUser().getGender(), age);
         } else if (rbc) {
-            mainCommentText = analysisService.analyzeBloodParameters(rbcIdx);
+            System.out.println(rbc);
+            mainCommentText = analysisService.analyzeBloodParameters(rbcIdx, usersService.getCurrentUser().getGender(), age);
         }
 
-        return mainCommentText+commentTexts;
+        return mainCommentText+" "+commentTexts;
     }
 
     private Indicator_dto createIndicator(String name, double index) {
@@ -208,135 +228,12 @@ public class TestResultsFunctions {
 
         StandarDataComparison data = comparisonService.findComparisonData(name, usersService.getCurrentUser().getGender(), age);
 
+
         if(data.getMin() <= index && index <= data.getMax()){
             return true;
         } else {
             return false;
         }
-
-        /*switch(name){
-            case "rbc":
-                if(data.getMin() <= index && index <= data.getMax()){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "hemoglobin":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "hematocrit":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "mchc":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "mcv":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "mch":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "colorIndicator":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "reticulocytes":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "platelets":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "wbc":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "neutrophils":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "eosinophils":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "basophils":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "lymphocytes":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "monocytes":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "ESR":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "thrombocrit":
-                if(index > 0){
-                    return true;
-                } else {
-                    return false;
-                }
-
-            default:
-                return true;
-        }*/
 
 
     }
