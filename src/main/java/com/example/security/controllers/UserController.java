@@ -120,7 +120,8 @@ public class UserController {
 
         Assessment assessment = assessmentService.getAssessment(id);
 
-        if(usersService.getCurrentUser() == assessment.getUser()){
+
+        if(usersService.getCurrentUser().getId() == assessment.getUser().getId()){
             return ResponseEntity.ok(new Assessment(assessment.getId(), assessment.getRating(), assessment.getComments()));
         } else {
             return ResponseEntity.status(500).body(new Assessment());
