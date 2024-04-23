@@ -1,6 +1,7 @@
 package com.example.security.services.impl;
 
 import com.example.security.entity.Assessment;
+import com.example.security.entity.Users;
 import com.example.security.repository.AssessmentRepository;
 import com.example.security.services.AssessmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,5 +33,10 @@ public class AssessmentServiceImpl implements AssessmentService {
     @Override
     public void deleteAssessment(Assessment assessment) {
         assessmentRepository.delete(assessment);
+    }
+
+    @Override
+    public List<Long> getALlAssessmentId(Users user) {
+        return assessmentRepository.findAllIdsByUser(user);
     }
 }

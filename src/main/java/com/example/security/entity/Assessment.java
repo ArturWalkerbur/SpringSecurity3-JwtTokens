@@ -26,4 +26,9 @@ public class Assessment {
     @ManyToOne(fetch = FetchType.EAGER)
     private Users user;
 
+    public Assessment(Long id, double rating, String comments) {
+        this.id = id;
+        this.rating = rating;
+        this.comments = comments;
+    }
 }

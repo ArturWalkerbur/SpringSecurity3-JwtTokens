@@ -77,6 +77,21 @@ public class UserController {
 
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/get_user_assessments")
+    @ResponseBody
+    public ResponseEntity<List<Long>> getAllAssessmentsId(HttpServletRequest request){
+
+        String token = request.getHeader("Authorization");
+        if (token == null || token.isEmpty()) {
+            return null;
+        }
+
+        List<Long> assessmentsIds = assessmentService.getALlAssessmentId(usersService.getCurrentUser());
+        return ResponseEntity.ok(assessmentsIds);
+
+    }
+
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/get_all_assessments")
@@ -103,7 +118,15 @@ public class UserController {
             return null;
         }
 
-        return ResponseEntity.ok( assessmentService.getAssessment(id));
+        Assessment assessment = assessmentService.getAssessment(id);
+
+        if(usersService.getCurrentUser() == assessment.getUser()){
+            return ResponseEntity.ok(new Assessment(assessment.getId(), assessment.getRating(), assessment.getComments()));
+        } else {
+            return ResponseEntity.status(500).body(new Assessment());
+        }
+
+
 
     }
 
