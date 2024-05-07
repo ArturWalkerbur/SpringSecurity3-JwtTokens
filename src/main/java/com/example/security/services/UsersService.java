@@ -68,12 +68,11 @@ public class UsersService implements UserDetailsService {
 
             String message = String.format(
                     "Привет, %s! \n" +
-                            "Вас приветствует компания MedicalApps. Пожалуйста, перейдите по ссылке чтобы подтвердить вашу почту: "+hostserver+"/api/auth/activate/%s",
+                            "Вас приветствует компания MedicalApps. Пожалуйста, перейдите по ссылке чтобы подтвердить вашу почту: "+hostserver+"/api/auth/activate/%s \n\n" +
+                            "Если вы не регистрировались у нас, проигнорируйте это сообщение!",
                     newUser.getUsername(),
                     newUser.getActivationCode()
             );
-
-            System.out.println("ccccccccc");
 
             mailSender.send(newUser.getEmail(), "Activation Code", message);
 
@@ -116,8 +115,6 @@ public class UsersService implements UserDetailsService {
             return false;
         }
 
-        System.out.println("jjjjjjjjj");
-
         user.setActivationCode(null);
 
         usersRepository.save(user);
@@ -125,4 +122,47 @@ public class UsersService implements UserDetailsService {
         return true;
 
     }
+
+    public String forgottenPassword(String email){
+
+        Users user = usersRepository.findByEmail(email);
+
+        if(user != null){
+
+            user.setActivationCode(UUID.randomUUID().toString());
+            usersRepository.save(user);
+
+            String message = String.format(
+                    "Привет, %s! \n" +
+                            "Для восстановления пароля, пожалуйста, перейдите по этой ссылке: "+hostserver+"/api/auth/recover-password/%s",
+                    user.getUsername(),
+                    user.getActivationCode()
+            );
+
+            mailSender.send(user.getEmail(), "Password Recovery", message);
+
+            return "success";
+
+        } else {
+            return "something wrong!";
+        }
+
+    }
+
+    public String recoverPassword(String newPassword, String reNewPassword, String code) {
+        Users user = usersRepository.findByActivationCode(code);
+
+        if (user == null){
+            return "recover-password?code-error";
+        }
+
+        if(!newPassword.equals(reNewPassword)){
+            return "recover-password?retype-error";
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setActivationCode(null);
+        usersRepository.save(user);
+        return "profile?success";
+    }
+
 }

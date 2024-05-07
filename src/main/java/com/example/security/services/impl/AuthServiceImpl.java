@@ -6,13 +6,17 @@ import com.example.security.entity.Users;
 import com.example.security.repository.UsersRepository;
 import com.example.security.services.AuthService;
 import com.example.security.services.UsersService;
+import io.jsonwebtoken.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -31,6 +35,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public String login(User_dto loginDto) {
 
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 
         String email = loginDto.getEmail();
         if (email.contains("%40")) {
@@ -44,6 +50,10 @@ public class AuthServiceImpl implements AuthService {
         if(user.getActivationCode() != null){
             return "Account not activated!";
         }
+        if(!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())){
+            return "The password was entered incorrectly!";
+        }
+
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     email, loginDto.getPassword()));

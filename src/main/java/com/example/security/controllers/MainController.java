@@ -3,6 +3,7 @@ package com.example.security.controllers;
 
 import com.example.security.dto.JWTAuthResponse;
 import com.example.security.dto.Register_dto;
+import com.example.security.dto.UpdatePassword;
 import com.example.security.dto.User_dto;
 import com.example.security.entity.Users;
 import com.example.security.services.AuthService;
@@ -35,8 +36,6 @@ public class MainController {
         JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
         jwtAuthResponse.setAccessToken(token);
 
-        System.out.println(token);
-
         return ResponseEntity.ok(jwtAuthResponse);
     }
 
@@ -59,7 +58,6 @@ public class MainController {
     @ResponseBody
     public String activate(@PathVariable String code){
 
-        System.out.println("ffffff");
 
         boolean isActivated = usersService.activateUser(code);
 
@@ -68,6 +66,33 @@ public class MainController {
         } else {
             return "Activation code not found!";
         }
+
+    }
+
+    @PreAuthorize("isAnonymous()")
+    @GetMapping("/password-forgotten/{email}")
+    @ResponseBody
+    public ResponseEntity<String> passwordForgotten(@PathVariable String email){
+        if (email.contains("%40")) {
+            email = email.replace("%40", "@");
+        }
+
+        String status = usersService.forgottenPassword(email);
+
+        return ResponseEntity.ok(status);
+
+    }
+
+    @PreAuthorize("isAnonymous()")
+    @PostMapping("/recover-password")
+    @ResponseBody
+    public ResponseEntity<String> recoverPassword(@RequestBody UpdatePassword updatePassword){
+
+        String code = updatePassword.getCode();
+
+        String status = usersService.recoverPassword(updatePassword.getNewPassword(), updatePassword.getReNewPassword(), code);
+
+        return ResponseEntity.ok(status);
 
     }
 

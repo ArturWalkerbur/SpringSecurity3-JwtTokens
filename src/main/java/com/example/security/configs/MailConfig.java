@@ -38,7 +38,7 @@ public class MailConfig {
     public JavaMailSender getEmailSender() {
         JavaMailSenderImpl mailSender =   new JavaMailSenderImpl();
 
-        System.out.println(password);
+        //System.out.println(password);
 
         mailSender.setHost(host);
         mailSender.setPort(port);

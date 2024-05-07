@@ -23,8 +23,6 @@ public class MailSender {
         mailMessage.setSubject(subject);
         mailMessage.setText(message);
 
-        System.out.println("bbbbbbbbb");
-
         mailSender.send(mailMessage);
 
     }
