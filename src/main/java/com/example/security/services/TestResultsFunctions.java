@@ -187,12 +187,9 @@ public class TestResultsFunctions {
 
         String mainCommentText = "";
 
-        System.out.println(rbc);
-
         if (rbc && hemoglobin && hematocrit && mchc && mcv && mch) {
             mainCommentText = analysisService.analyzeBloodParameters(rbcIdx, hemoglobinIdx, hematocritIdx, mchcIdx, mcvIdx, mchIdx, usersService.getCurrentUser().getGender(), age);
         } else if (rbc) {
-            System.out.println(rbc);
             mainCommentText = analysisService.analyzeBloodParameters(rbcIdx, usersService.getCurrentUser().getGender(), age);
         }
 
