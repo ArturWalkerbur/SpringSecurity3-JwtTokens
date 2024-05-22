@@ -25,7 +25,7 @@ import java.util.List;
 @Controller
 @RestController
 @RequestMapping("/api/user")
-@CrossOrigin(origins = {"http://localhost:4200", "https://frontend-angular-1.onrender.com"})
+@CrossOrigin(origins = {"http://localhost:4200", "https://medical-web-92bn.onrender.com"})
 public class UserController {
 
     @Autowired
