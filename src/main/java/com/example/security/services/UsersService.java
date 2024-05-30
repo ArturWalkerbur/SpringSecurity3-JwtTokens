@@ -68,7 +68,7 @@ public class UsersService implements UserDetailsService {
 
             String message = String.format(
                     "Привет, %s! \n" +
-                            "Вас приветствует компания MedicalApps. Пожалуйста, перейдите по ссылке чтобы подтвердить вашу почту: "+hostserver+"/api/auth/activate/%s \n\n" +
+                            "Вас приветствует компания MedicalApps. Пожалуйста, перейдите по ссылке чтобы подтвердить вашу почту: "+hostserver+"/activate/%s \n\n" +
                             "Если вы не регистрировались у нас, проигнорируйте это сообщение!",
                     newUser.getUsername(),
                     newUser.getActivationCode()
@@ -134,7 +134,7 @@ public class UsersService implements UserDetailsService {
 
             String message = String.format(
                     "Привет, %s! \n" +
-                            "Для восстановления пароля, пожалуйста, перейдите по этой ссылке: "+hostserver+"/api/auth/recover-password/%s",
+                            "Для восстановления пароля, пожалуйста, перейдите по этой ссылке: "+hostserver+"/recover-password/%s",
                     user.getUsername(),
                     user.getActivationCode()
             );
