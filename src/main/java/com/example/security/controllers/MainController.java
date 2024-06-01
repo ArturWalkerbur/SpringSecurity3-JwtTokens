@@ -47,9 +47,7 @@ public class MainController {
         if (email.contains("%40")) {
             email = email.replace("%40", "@");
         }
-        System.out.println("aaaaaaaa");
         String result = usersService.addUser(new Users(null, email, register_dto.getPassword(), register_dto.getFullName(), register_dto.getBirthDate(), register_dto.getGender(), register_dto.getLastDiagnosis(), register_dto.getContact()), register_dto.getRePassword());
-        System.out.println("eeeeeeee");
         return "New user registered?" + result;
     }
 

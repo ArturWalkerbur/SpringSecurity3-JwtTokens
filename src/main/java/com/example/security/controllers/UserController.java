@@ -1,9 +1,6 @@
 package com.example.security.controllers;
 
-import com.example.security.dto.Indicator_dto;
-import com.example.security.dto.TestResults_dto;
-import com.example.security.dto.UpdatePassword;
-import com.example.security.dto.User_dto;
+import com.example.security.dto.*;
 import com.example.security.entity.Assessment;
 import com.example.security.entity.StandarDataComparison;
 import com.example.security.entity.Users;
@@ -20,7 +17,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Array;
 import java.util.List;
+import java.util.Objects;
 
 @Controller
 @RestController
@@ -61,6 +60,23 @@ public class UserController {
         }
 
         return ResponseEntity.ok(new Users(usersService.getCurrentUser().getId(), usersService.getCurrentUser().getEmail(), usersService.getCurrentUser().getFullName(), usersService.getCurrentUser().getBirthDate(), usersService.getCurrentUser().getGender(), usersService.getCurrentUser().getLastDiagnosis(), usersService.getCurrentUser().getContact(), usersService.getCurrentUser().getRoles()));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/user_data_update")
+    @ResponseBody
+    public String UpdateUser(HttpServletRequest request, @RequestBody User_dto userDto){
+
+        String token = request.getHeader("Authorization");
+        if (token == null || token.isEmpty()) {
+            return null;
+        } else {
+            token = token.substring(7, token.length());
+        }
+
+        String email = usersService.EjectEmail(token);
+        String result = usersService.updateUser(email, userDto.getFullName(), userDto.getBirthDate(), userDto.getContact());
+        return "User was updated?" + result;
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -180,11 +196,50 @@ public class UserController {
 
         try{
 
+            Users user = usersService.getCurrentUser();
             Assessment assessment = assessmentService.getAssessment(id);
+            if(Objects.equals(assessment.getUser().getId(), user.getId())){
+                assessmentService.deleteAssessment(assessment);
+                return ResponseEntity.ok("Assessment deleted!");
+            } else {
+                return ResponseEntity.status(500).body("This user(You) cannot delete this assessment.");
+            }
 
-            assessmentService.deleteAssessment(assessment);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error deleting assessment");
+        }
 
-            return ResponseEntity.ok("New assessment deleted!");
+
+
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/deleteAssessments")
+    @ResponseBody
+    public ResponseEntity<String> deleteAssessment(HttpServletRequest request, @RequestBody SelectedAssessmentsID selectedAssessmentsID){
+
+        String token = request.getHeader("Authorization");
+        if (token == null || token.isEmpty()) {
+            return null;
+        }
+        String returnedText = "Assessments with numbers: ";
+
+        try{
+            List assessmentIdArr = selectedAssessmentsID.getSelectedAssessmentsId();
+            Users user = usersService.getCurrentUser();
+            for (int i = 0; i < assessmentIdArr.size(); i++) {
+                Assessment assessment = assessmentService.getAssessment(Long.valueOf((int)(assessmentIdArr.get(i))));
+                if(Objects.equals(assessment.getUser().getId(), user.getId())){
+                    assessmentService.deleteAssessment(assessment);
+                    returnedText = returnedText + assessmentIdArr.get(i) + ", ";
+                } else {
+                    returnedText = returnedText + assessmentIdArr.get(i) + " assessment is not available, ";
+                }
+            }
+
+            return ResponseEntity.ok(returnedText + "deleted");
+
 
         }catch (Exception e){
             e.printStackTrace();
