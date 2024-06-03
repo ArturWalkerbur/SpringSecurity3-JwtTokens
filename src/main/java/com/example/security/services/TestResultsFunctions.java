@@ -1,5 +1,6 @@
 package com.example.security.services;
 
+import com.example.security.dto.Comment_dto;
 import com.example.security.dto.Indicator_dto;
 import com.example.security.dto.TestResults_dto;
 import com.example.security.entity.StandarDataComparison;
@@ -81,7 +82,7 @@ public class TestResultsFunctions {
         return indicators;
     }
 
-    public String chooseAnalysisFunction(List<Indicator_dto> filteredIndicators) {
+    public Comment_dto chooseAnalysisFunction(List<Indicator_dto> filteredIndicators) {
         boolean rbc = false, hemoglobin = false, hematocrit = false, mchc = false, mcv = false, mch = false,
                 colorIndicator = false, reticulocytes = false, platelets = false, wbc = false,
                 neutrophils = false, eosinophils = false, basophils = false, lymphocytes = false,
@@ -109,6 +110,7 @@ public class TestResultsFunctions {
 
 
         StringBuilder commentTexts = new StringBuilder();
+        double rating = 10;
 
         for (Indicator_dto indicator : filteredIndicators) {
             String name = indicator.getName();
@@ -182,18 +184,26 @@ public class TestResultsFunctions {
                     thrombocritIdx = indicator.getIndex();
                     break;
             }
-            commentTexts.append(" ").append(analysisService.commentIndicator(indicator.getName(), indicator.getIndex(), usersService.getCurrentUser().getGender(), age));
+            Comment_dto indicator_estimation = analysisService.commentIndicator(indicator.getName(), indicator.getIndex(), usersService.getCurrentUser().getGender(), age);
+            rating = rating - indicator_estimation.getNegative_rating();
+            commentTexts.append(" ").append(indicator_estimation.getComment_part());
         }
 
         String mainCommentText = "";
 
+        Comment_dto main_estimation = new Comment_dto();
+
         if (rbc && hemoglobin && hematocrit && mchc && mcv && mch) {
-            mainCommentText = analysisService.analyzeBloodParameters(rbcIdx, hemoglobinIdx, hematocritIdx, mchcIdx, mcvIdx, mchIdx, usersService.getCurrentUser().getGender(), age);
+            main_estimation = analysisService.analyzeBloodParameters(rbcIdx, hemoglobinIdx, hematocritIdx, mchcIdx, mcvIdx, mchIdx, usersService.getCurrentUser().getGender(), age);
+            mainCommentText = main_estimation.getComment_part();
+            rating = rating - main_estimation.getNegative_rating();
         } else if (rbc) {
-            mainCommentText = analysisService.analyzeBloodParameters(rbcIdx, usersService.getCurrentUser().getGender(), age);
+            main_estimation = analysisService.analyzeBloodParameters(rbcIdx, usersService.getCurrentUser().getGender(), age);
+            mainCommentText = main_estimation.getComment_part();
+            rating = rating - main_estimation.getNegative_rating();
         }
 
-        return mainCommentText+" "+commentTexts;
+        return new Comment_dto(mainCommentText+" "+commentTexts, rating);
     }
 
     private Indicator_dto createIndicator(String name, double index) {
@@ -224,7 +234,7 @@ public class TestResultsFunctions {
         }
 
         StandarDataComparison data = comparisonService.findComparisonData(name, usersService.getCurrentUser().getGender(), age);
-
+        System.out.println(data);
 
         if(data.getMin() <= index && index <= data.getMax()){
             return true;

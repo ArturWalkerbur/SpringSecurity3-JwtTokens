@@ -17,7 +17,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.thymeleaf.util.StringUtils;
 
-import java.security.Key;
 import java.sql.Date;
 import java.util.*;
 
@@ -95,14 +94,12 @@ public class UsersService implements UserDetailsService {
     }
 
     public String updateUser(String email, String fullName, Date bdate, String contact){
-        System.out.println(email);
         Users user = usersRepository.findByEmail(email);
         if (user != null){
             user.setFullName(fullName);
             user.setBirthDate(bdate);
             user.setContact(contact);
             usersRepository.save(user);
-            System.out.println(user);
             return "Success";
         }
         return "Email-error!UserDoesNotExist";

@@ -165,8 +165,8 @@ public class UserController {
                     .toList();
 
             if(filteredIndicators.size() > 0){
-                String comment = testResultsFunctions.chooseAnalysisFunction(filteredIndicators);
-                assessmentService.addAssessment(new Assessment(null, 10, comment, usersService.getCurrentUser()));
+                Comment_dto comment = testResultsFunctions.chooseAnalysisFunction(filteredIndicators);
+                assessmentService.addAssessment(new Assessment(null, comment.getNegative_rating(), comment.getComment_part(), usersService.getCurrentUser()));
 
                 return ResponseEntity.ok("The data has been processed successfully!");
             } else {

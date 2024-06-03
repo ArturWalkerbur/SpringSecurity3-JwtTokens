@@ -1,5 +1,6 @@
 package com.example.security.services.impl;
 
+import com.example.security.dto.Comment_dto;
 import com.example.security.entity.StandarDataComparison;
 import com.example.security.services.AnalysisService;
 import com.example.security.services.StandarDataComparisonService;
@@ -13,7 +14,7 @@ public class AnalysisServiceImpl implements AnalysisService {
     private StandarDataComparisonService comparisonService;
 
     @Override
-    public String analyzeBloodParameters(double rbc, double hemoglobin, double hematocrit, double mchc, double mcv, double mch, String gender, int age) {
+    public Comment_dto analyzeBloodParameters(double rbc, double hemoglobin, double hematocrit, double mchc, double mcv, double mch, String gender, int age) {
 
         StandarDataComparison rbcStan = comparisonService.findComparisonData("rbc", gender, age);
         StandarDataComparison hemoglobinStan = comparisonService.findComparisonData("hemoglobin", gender, age);
@@ -23,31 +24,31 @@ public class AnalysisServiceImpl implements AnalysisService {
         StandarDataComparison mchStan = comparisonService.findComparisonData("mch", gender, age);
 
         if(rbc > rbcStan.getMax() && hemoglobin > hemoglobinStan.getMax() && hematocrit > hematocritStan.getMax() && mchc > mchcStan.getMax() && mcv > mcvStan.getMax() && mcv > mcvStan.getMax()){
-            return "Показатели RBC, гемоглобин, гематокрит, MCHC, MCV, MCH повышены(выше нормы). Возможно проблемы с почками, костным мозгом и сердечной недостаточностью." +
+            return new Comment_dto("Показатели RBC, гемоглобин, гематокрит, MCHC, MCV, MCH повышены(выше нормы). Возможно проблемы с почками, костным мозгом и сердечной недостаточностью." +
                     "Проблемы с почками могут влиять на состав крови из-за их роли в регуляции процессов образования крови и удаления токсинов. Например, заболевания почек, такие как хроническая почечная недостаточность, могут привести к анемии из-за недостатка эритропоэтина (гормона, который стимулирует образование эритроцитов).\n" +
                     "\n" +
                     "Проблемы с костным мозгом, такие как миелопролиферативные заболевания (например, полицитемия веры), могут вызывать избыточное производство эритроцитов и, следовательно, повышение всех вышеперечисленных параметров.\n" +
                     "\n" +
-                    "Сердечная недостаточность также может вызвать изменения в составе крови. Например, из-за снижения эффективности кровообращения организм может начать продуцировать больше эритроцитов, чтобы компенсировать недостаток кислорода, что приводит к полицитемии";
+                    "Сердечная недостаточность также может вызвать изменения в составе крови. Например, из-за снижения эффективности кровообращения организм может начать продуцировать больше эритроцитов, чтобы компенсировать недостаток кислорода, что приводит к полицитемии", 1);
 
         } else {
-            return "";
+            return new Comment_dto("", 0);
         }
     }
 
     @Override
-    public String analyzeBloodParameters(double rbc, String gender, int age) {
+    public Comment_dto analyzeBloodParameters(double rbc, String gender, int age) {
         StandarDataComparison rbcStan = comparisonService.findComparisonData("rbc", gender, age);
         if(rbc > rbcStan.getMax()){
-            return "Показатель RBC(Эритроциты) повышен (выше нормы). Возможно обезвоживание. Также высокое количество эритроцитов может наблюдаться у людей, живущих на большой высоте (не хватает кислорода)";
+            return new Comment_dto("Показатель RBC(Эритроциты) повышен (выше нормы). Возможно обезвоживание. Также высокое количество эритроцитов может наблюдаться у людей, живущих на большой высоте (не хватает кислорода)", 0.5);
         } else {
-            return "Показатель RBC(Эритроциты) понижен (меньше нормы). Возможно гипергидратация. Гипергидратация означает избыток воды в организме. Также Низкое количество эритроцитов может быть симптомом анемии из-за потери крови, гемолиза или дефицита витамина В9 (фолиевая кислота) и В12 (цианокобаламин).";
+            return new Comment_dto("Показатель RBC(Эритроциты) понижен (меньше нормы). Возможно гипергидратация. Гипергидратация означает избыток воды в организме. Также Низкое количество эритроцитов может быть симптомом анемии из-за потери крови, гемолиза или дефицита витамина В9 (фолиевая кислота) и В12 (цианокобаламин).", 0.5);
         }
 
     }
 
     @Override
-    public String commentIndicator(String indicatorName, double indicatorIndex, String gender, int age) {
+    public Comment_dto commentIndicator(String indicatorName, double indicatorIndex, String gender, int age) {
         StandarDataComparison data = comparisonService.findComparisonData(indicatorName, gender, age);
         String comment_text = "";
         double index_norm = 0;
@@ -209,166 +210,272 @@ public class AnalysisServiceImpl implements AnalysisService {
                 comment_text = "";
                 break;
         }
-        return comment_text + " " + IndicatorStatusReturn(indicatorName, indicatorIndex, index_norm);
+        Comment_dto estimation = IndicatorStatusReturn(indicatorName, indicatorIndex, index_norm);
+        return new Comment_dto(comment_text + " " + estimation.getComment_part(), estimation.getNegative_rating());
     }
 
-    private String IndicatorStatusReturn(String indicatorName, double indicatorIndex, double indexNorm){
+    private Comment_dto IndicatorStatusReturn(String indicatorName, double indicatorIndex, double indexNorm){
+        Comment_dto comment = new Comment_dto();
         switch (indicatorName) {
             case "rbc":
                 if(Math.abs(indicatorIndex - indexNorm) < 0.5){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 1){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "hemoglobin":
                 if(Math.abs(indicatorIndex - indexNorm) < 15){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 25){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "hematocrit":
                 if(Math.abs(indicatorIndex - indexNorm) < 8){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 16){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "mchc":
                 if(Math.abs(indicatorIndex - indexNorm) < 30){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 50){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "mcv":
                 if(Math.abs(indicatorIndex - indexNorm) < 15){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 30){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "mch":
                 if(Math.abs(indicatorIndex - indexNorm) < 5){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 10){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "colorIndicator":
                 if(Math.abs(indicatorIndex - indexNorm) < 0.1){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 0.5){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "reticulocytes":
                 if(Math.abs(indicatorIndex - indexNorm) < 0.5){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 2){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "platelets":
                 if(Math.abs(indicatorIndex - indexNorm) < 30){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 45){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "wbc":
                 if(Math.abs(indicatorIndex - indexNorm) < 2){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 4){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "neutrophils":
                 if(Math.abs(indicatorIndex - indexNorm) < 10){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 25){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "eosinophils":
                 if(Math.abs(indicatorIndex - indexNorm) < 0.5){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 2){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "basophils":
                 if(Math.abs(indicatorIndex - indexNorm) < 0.2){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 0.5){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "lymphocytes":
                 if(Math.abs(indicatorIndex - indexNorm) < 5){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 10){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "monocytes":
                 if(Math.abs(indicatorIndex - indexNorm) < 1.5){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 3){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "ESR":
                 if(Math.abs(indicatorIndex - indexNorm) < 2){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 5){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             case "thrombocrit":
                 if(Math.abs(indicatorIndex - indexNorm) < 0.1){
-                    return "Некритично.";
+                    comment.setComment_part("Некритично.");
+                    comment.setNegative_rating(0.05);
+                    return comment;
                 } else if(Math.abs(indicatorIndex - indexNorm) < 0.3){
-                    return "Стоит обратить внимание.";
+                    comment.setComment_part("Стоит обратить внимание.");
+                    comment.setNegative_rating(0.1);
+                    return comment;
                 } else {
-                    return "Следует обратиться к врачу.";
+                    comment.setComment_part("Следует обратиться к врачу.");
+                    comment.setNegative_rating(0.15);
+                    return comment;
                 }
 
             default:
-                return "?";
+                comment.setComment_part("?");
+                comment.setNegative_rating(0);
+                return comment;
         }
     }
 

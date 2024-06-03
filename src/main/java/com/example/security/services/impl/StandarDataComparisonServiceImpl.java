@@ -19,6 +19,7 @@ public class StandarDataComparisonServiceImpl implements StandarDataComparisonSe
 
     @Override
     public StandarDataComparison findComparisonData(String indicator, String gender, int age) {
+        System.out.println(indicator + " " + gender + " " + age);
         return comparisonRepository.findByGenderAndAge(indicator, gender, age);
     }
 
