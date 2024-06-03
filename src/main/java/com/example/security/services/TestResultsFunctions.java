@@ -234,7 +234,6 @@ public class TestResultsFunctions {
         }
 
         StandarDataComparison data = comparisonService.findComparisonData(name, usersService.getCurrentUser().getGender(), age);
-        System.out.println(data);
 
         if(data.getMin() <= index && index <= data.getMax()){
             return true;
